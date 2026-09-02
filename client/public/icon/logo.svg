@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <style>
+    .viking-head {
+      fill: #FFD700;
+      stroke: #112244;
+      stroke-width: 5;
+    }
+    .viking-horns {
+      fill: #FFD700;
+      stroke: #112244;
+      stroke-width: 5;
+    }
+    .viking-eyes {
+      fill: white;
+      stroke: #112244;
+      stroke-width: 2;
+    }
+    .viking-pupils {
+      fill: #112244;
+    }
+    .viking-text {
+      fill: #112244;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+    }
+  </style>
+  
+  <!-- Viking face -->
+  <path class="viking-head" d="M100,30 C65,30 50,65 50,100 C50,135 65,155 100,155 C135,155 150,135 150,100 C150,65 135,30 100,30 Z" />
+  
+  <!-- Helmet -->
+  <path class="viking-head" d="M100,35 C85,35 70,45 65,65 L135,65 C130,45 115,35 100,35 Z" />
+  
+  <!-- Left horn -->
+  <path class="viking-horns" d="M65,60 C55,40 35,50 25,20 C40,45 45,55 60,65 Z" />
+  
+  <!-- Right horn -->
+  <path class="viking-horns" d="M135,60 C145,40 165,50 175,20 C160,45 155,55 140,65 Z" />
+  
+  <!-- Eyes -->
+  <circle class="viking-eyes" cx="80" cy="90" r="10" />
+  <circle class="viking-eyes" cx="120" cy="90" r="10" />
+  
+  <!-- Pupils -->
+  <circle class="viking-pupils" cx="80" cy="90" r="4" />
+  <circle class="viking-pupils" cx="120" cy="90" r="4" />
+  
+  <!-- Beard -->
+  <path class="viking-head" d="M80,110 C85,115 95,115 100,113 C105,115 115,115 120,110 C115,125 105,130 100,130 C95,130 85,125 80,110 Z" />
+  <path class="viking-head" d="M100,130 C90,140 85,150 90,160 C95,160 105,160 110,160 C115,150 110,140 100,130 Z" />
+  
+  <!-- Text -->
+  <text class="viking-text" x="100" y="185" text-anchor="middle" font-size="20">BML</text>
+</svg>
