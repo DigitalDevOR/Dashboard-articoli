@@ -22,7 +22,6 @@ export const seedSuperAdmin = async () => {
     email,
     password,
     isSuperAdmin: true,
-    siteAccess: [],
     isActive: true,
   });
 };

@@ -32,7 +32,6 @@ const seedSuperAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
         email,
         password,
         isSuperAdmin: true,
-        siteAccess: [],
         isActive: true,
     });
 });

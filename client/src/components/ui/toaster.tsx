@@ -1,40 +1,42 @@
-import React from "react"
-import { useToast } from "@/hooks/use-toast"
 import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast"
-import { Button } from "@/components/ui/button"
+    Toast,
+    ToastClose,
+    ToastDescription,
+    ToastProvider,
+    ToastTitle,
+    ToastViewport,
+} from "./toast";
+import { useToastStore } from "../../store/toast.store";
+
+const TOAST_DURATION_MS = 4_000;
 
 export function Toaster() {
-  const { toasts } = useToast()
+    const toasts = useToastStore((state) => state.toasts);
+    const removeToast = useToastStore((state) => state.removeToast);
 
-  return (
-    <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, button, ...props }) {
-        return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-              {
-                button && (
-                  <Button onClick={button.onClick} >{button.label}</Button>
-                )
-              }
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        )
-      })}
-      <ToastViewport />
-    </ToastProvider>
-  )
+    return (
+        <ToastProvider swipeDirection="right">
+            {toasts.map((toast) => (
+                <Toast
+                    key={toast.id}
+                    variant={toast.variant}
+                    duration={TOAST_DURATION_MS}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            removeToast(toast.id);
+                        }
+                    }}
+                >
+                    <div className="grid gap-1">
+                        <ToastTitle className="font-semibold">{toast.title}</ToastTitle>
+                        {toast.description && (
+                            <ToastDescription>{toast.description}</ToastDescription>
+                        )}
+                    </div>
+                    <ToastClose aria-label="Chiudi notifica">×</ToastClose>
+                </Toast>
+            ))}
+            <ToastViewport />
+        </ToastProvider>
+    );
 }

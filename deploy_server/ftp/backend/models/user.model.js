@@ -47,27 +47,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+require("./wordpressSite.model");
 const userSchema = new mongoose_1.Schema({
     nome: { type: String, required: true },
     cognome: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     isSuperAdmin: {
         type: Boolean,
         default: false,
     },
     siteAccess: {
-        type: [
-            {
-                siteId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'WordPressSite', required: true },
-                role: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Role', required: true },
-                additionalPermissions: {
-                    type: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Permission' }],
-                    default: [],
-                },
+        type: {
+            siteId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'WordpressSite', required: true },
+            role: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Role', required: true },
+            additionalPermissions: {
+                type: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Permission' }],
+                default: [],
             },
-        ],
-        default: [],
+        },
     },
     isActive: {
         type: Boolean,

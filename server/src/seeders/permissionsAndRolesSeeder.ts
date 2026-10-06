@@ -15,6 +15,7 @@ const basePermissions = [
   { name: 'permission:assign', label: 'Assegna permessi', category: 'permission', description: 'Permette di assegnare permessi a utenti e siti' },
 
   { name: 'post:create', label: 'Crea post', category: 'post', description: 'Permette di creare un post WordPress' },
+  { name: 'post:read', label: 'Leggi post', category: 'post', description: 'Permette di leggere i post WordPress' },
   { name: 'post:update', label: 'Modifica post', category: 'post', description: 'Permette di modificare un post WordPress' },
   { name: 'post:delete', label: 'Elimina post', category: 'post', description: 'Permette di eliminare un post WordPress' },
   { name: 'post:publish', label: 'Pubblica post', category: 'post', description: 'Permette di pubblicare un post WordPress' },
@@ -28,8 +29,10 @@ const roleTemplates = {
       'site:update',
       'user:create',
       'user:update',
+      'user:delete',
       'user:read',
       'post:create',
+      'post:read',
       'post:update',
       'post:delete',
       'post:publish',
@@ -40,6 +43,7 @@ const roleTemplates = {
     permissions: [
       'site:read',
       'post:create',
+      'post:read',
       'post:update',
       'post:delete',
       'post:publish',
@@ -51,13 +55,15 @@ export const seedPermissionsAndRoles = async () => {
   const permissionMap: Record<string, any> = {};
 
   for (const permission of basePermissions) {
-    const savedPermission = await Permission.findOneAndUpdate(
-      { name: permission.name },
-      permission,
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    const existingPermission = await Permission.findOne({ name: permission.name });
 
-    permissionMap[permission.name] = savedPermission._id;
+    if (!existingPermission) {
+      const newPermission = await Permission.create(permission);
+      permissionMap[permission.name] = newPermission._id;
+    } else {
+      permissionMap[permission.name] = existingPermission._id;
+    }
+
   }
 
   for (const [roleName, config] of Object.entries(roleTemplates)) {

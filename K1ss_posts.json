@@ -1,60 +1,14 @@
-[
-    {
-        "type": "header",
-        "version": "5.2.3",
-        "comment": "Export to JSON plugin for phpMyAdmin"
-    },
-    {
-        "type": "database",
-        "name": "kisskiss"
-    },
-    {
-        "type": "table",
-        "name": "K1ss_posts",
-        "database": "kisskiss",
-        "data": [
-            {
-                "ID": "2150392",
-                "post_author": "3441",
-                "post_date": "2026-09-01 15:24:20",
-                "post_date_gmt": "2026-09-01 13:24:20",
-                "post_content": 
-                "<p>Greta Scarano si prepara a salire sul palco dell’83esima Mostra del Cinema di Venezia, dove sarà al fianco di Nicolas Maupas per condurre le cerimonie di apertura e chiusura. A pochi giorni dall’appuntamento, l’attrice ha raccontato aspettative, emozioni e riflessioni personali in un’intervista a La Repubblica, soffermandosi anche sulla situazione in Palestina, sull’ambiente e sul ruolo delle donne nel cinema.<\/p>
-                <h2>Greta Scarano e Nicolas Maupas alla conduzione di Venezia 83<\/h2>
-                <p>Per questa edizione la tradizionale figura della madrina lascia spazio a una conduzione condivisa. Una formula che Scarano guarda con favore: “Forse il ruolo simbolico della madrina è un po’ invecchiato. Essere in due significa dialogare, mi evito il classico discorsetto”.<\/p>
-                <p>L’incarico arriva in un momento importante del suo percorso professionale e personale: Scarano ha appena compiuto 40 anni, ha già realizzato un film da regista e ne ha un secondo in preparazione. A Venezia è arrivata accompagnata dalla famiglia, con una sola assenza sottolineata scherzosamente: “Non ho portato il cane e mi dispiace”.<\/p><h2>Il tono delle serate: leggerezza senza rinunciare alla profondità<\/h2><p>Scarano e Maupas intendono affrontare il palco soprattutto da appassionati della settima arte. L’obiettivo è evitare di trasformare le cerimonie in uno spazio per lezioni o proclami, cercando invece un equilibrio tra intrattenimento e contenuti.<\/p><p>“Non voglio salire sul palco e spiegare agli altri che penso del mondo. Io e Nicolas siamo prima di tutto spettatori e amiamo il cinema. Vorremmo essere leggeri, senza perdere profondità”, ha spiegato l’attrice nell’intervista.<\/p>
-                <h2>L’appello per la Palestina e le parole di Greta Scarano<\/h2>
-                <p>La conduzione della Mostra non impedirà però a Scarano di continuare a esprimersi sui temi sui quali ha già preso posizione. L’attrice ha infatti aderito a un appello rivolto alla Biennale per la Palestina.<\/p>
-                <p>“Ho firmato un appello per la Palestina alla Biennale, perché la luce su ciò che accade si è un po’ spenta. Non smetterò di dire ciò che penso sul genocidio, come sui rifugiati ucraini e sull’ambiente“, ha dichiarato.<\/p>
-                <p>Parlando del futuro e pensando anche a suo figlio, Scarano ha aggiunto: “provo moltissima paura, dall’altra riesco ancora a sperare grazie a lui. Vorrei che potesse vedere un mondo meno ingiusto e distrutto del nostro”.<\/p>
-                <h2>Il ricordo della figuraccia sul red carpet<\/h2>
-                <p>Nell’intervista a La Repubblica c’è spazio anche per un episodio decisamente più leggero legato alle precedenti esperienze veneziane. Scarano ha ricordato un momento particolare vissuto davanti ai fotografi sul tappeto rosso: “La figuraccia sul tappeto rosso: tutti fanno gesti con le dita, io per sbaglio faccio le corna“.<\/p>
-                <p>Un ricordo raccontato con ironia mentre si prepara questa volta a vivere la Mostra da una prospettiva differente, con il compito di accompagnarne i due momenti istituzionali principali.<\/p>
-                <h2>Una sola regista in concorso e la questione dello sguardo femminile<\/h2>
-                <p>Scarano ha affrontato anche il tema della presenza femminile dietro la macchina da presa, commentando la scelta di una sola regista nel concorso veneziano.<\/p>
-                <p>“Venezia è la foto di un problema sistemico. Questa rivoluzione richiede tempo, ma è necessaria, come lo è lo sguardo femminile sul mondo”, ha affermato.<\/p>
-                <h2>Il sogno di tornare a Venezia con un proprio film<\/h2>
-                <p>Dopo essere arrivata alla regia, Scarano non esclude che un giorno possa presentarsi alla Mostra con una sua opera in concorso. Un'eventualità che, però, vivrebbe con una buona dose di tensione a causa del proprio carattere competitivo.<\/p><p>“Ma non so se faccio quel tipo. E sarei terrorizzata: competitiva. Nessuno vuole giocare a biliardino contro di me, si scatena l’inferno. Con un film è peggio, ormai lo hai fatto e sei disarmato“.<\/p>
-                <p>Per il momento l’attenzione è concentrata sulla nuova esperienza al fianco di Nicolas Maupas: una conduzione a due con cui Venezia 83 supera la tradizionale figura della madrina e affida le cerimonie di apertura e chiusura a due protagonisti legati al mondo del cinema.<\/p>",
-                "post_title": "Greta Scarano verso Venezia 83: “Non smetterò di dire ciò che penso sul genocidio a Gaza, sui rifugiati ucraini e sull’ambiente”",
-                "post_excerpt": "Greta Scarano racconta la sua esperienza alla Mostra del Cinema di Venezia 2026, il suo ruolo istituzionale, la famiglia al seguito e le sue posizioni su temi globali come Gaza, Ucraina e ambiente.",
-                "post_status": "publish",
-                "comment_status": "",
-                "ping_status": "",
-                "post_password": "",
-                "post_name": "greta-scarano-verso-venezia-83-non-smettero-di-dire-cio-che-penso-sul-genocidio-a-gaza-sui-rifugiati-ucraini-e-sullambiente",
-                "to_ping": "",
-                "pinged": "",
-                "post_modified": "2026-09-01 15:24:20",
-                "post_modified_gmt": "2026-09-01 13:24:20",
-                "post_content_filtered": "",
-                "post_parent": "0",
-                "guid": "https:\/\/kisskiss.it\/uncategorized\/greta-scarano-verso-venezia-83-non-smettero-di-dire-cio-che-penso-sul-genocidio-a-gaza-sui-rifugiati-ucraini-e-sullambiente\/",
-                "menu_order": "0",
-                "post_type": "post",
-                "post_mime_type": "",
-                "comment_count": "0"
-            }
-        ]
-    }
-]
+{
+    "nomeSito": "kiss kiss staging",
+    "articleTitle": "L'euro ai minimi da 17 mesi con elezioni in Spagna, poi risale a 1,12 dollari",
+    "articleText": "<h2>Andamento dell'euro</h2><p>L'euro ha toccato il minimo da 17 mesi, scendendo fino a 1,1161 dollari prima di riguadagnare terreno e risalire a 1,1210 dollari.</p><h2>Contesto politico ed economico</h2><p>Il calo è collegato alla crisi in Francia e all'annuncio del governo spagnolo di elezioni anticipate per il 29 novembre, un fattore di rischio percepito dai mercati.</p><h2>Implicazioni sui mercati</h2><p>La debolezza dell'euro si inserisce in una cornice di tensioni sul debito sovrano francese e in altri paesi vulnerabili, con effetti attesi su volatilità e tassi di finanziamento.</p>",
+    "articleURL": "https://www.ansa.it/sito/notizie/topnews/2026/10/05/leuro-ai-minimi-da-17-mesi-con-elezioni-in-spagna-poi-risale-a-112-dollari_c35d7fb8-0eb8-4642-a1e2-2f844905c5ab.html",
+    "articleDate": "2026-10-05T09:18:31.000Z",
+    "category": "Politica",
+    "imageThumbURL": "",
+    "gettyImageId": "",
+    "gettyImageTitle": "",
+    "gettyDownloadURL": "",
+    "gettyProductType": "",
+    "gettyAgreementName": ""
+}

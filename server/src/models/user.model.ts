@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import './wordpressSite.model';
 
 export interface UserSiteAccessEntry {
     siteId: mongoose.Types.ObjectId;
@@ -13,7 +14,7 @@ export interface UserInterface extends Document {
     email: string;
     password: string;
     isSuperAdmin: boolean;
-    siteAccess: UserSiteAccessEntry[];
+    siteAccess?: UserSiteAccessEntry;
     isActive: boolean;
 }
 
@@ -21,23 +22,20 @@ const userSchema = new Schema<UserInterface>({
     nome: { type: String, required: true },
     cognome: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     isSuperAdmin: {
         type: Boolean,
         default: false,
     },
     siteAccess: {
-        type: [
-            {
-                siteId: { type: Schema.Types.ObjectId, ref: 'WordPressSite', required: true },
-                role: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
-                additionalPermissions: {
-                    type: [{ type: Schema.Types.ObjectId, ref: 'Permission' }],
-                    default: [],
-                },
+        type: {
+            siteId: { type: Schema.Types.ObjectId, ref: 'WordpressSite', required: true },
+            role: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
+            additionalPermissions: {
+                type: [{ type: Schema.Types.ObjectId, ref: 'Permission' }],
+                default: [],
             },
-        ],
-        default: [],
+        },
     },
     isActive: {
         type: Boolean,

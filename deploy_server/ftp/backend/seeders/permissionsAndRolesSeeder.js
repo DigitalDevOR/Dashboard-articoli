@@ -26,6 +26,7 @@ const basePermissions = [
     { name: 'user:read', label: 'Leggi utente', category: 'user', description: 'Permette di leggere i dettagli di un utente' },
     { name: 'permission:assign', label: 'Assegna permessi', category: 'permission', description: 'Permette di assegnare permessi a utenti e siti' },
     { name: 'post:create', label: 'Crea post', category: 'post', description: 'Permette di creare un post WordPress' },
+    { name: 'post:read', label: 'Leggi post', category: 'post', description: 'Permette di leggere i post WordPress' },
     { name: 'post:update', label: 'Modifica post', category: 'post', description: 'Permette di modificare un post WordPress' },
     { name: 'post:delete', label: 'Elimina post', category: 'post', description: 'Permette di eliminare un post WordPress' },
     { name: 'post:publish', label: 'Pubblica post', category: 'post', description: 'Permette di pubblicare un post WordPress' },
@@ -38,8 +39,10 @@ const roleTemplates = {
             'site:update',
             'user:create',
             'user:update',
+            'user:delete',
             'user:read',
             'post:create',
+            'post:read',
             'post:update',
             'post:delete',
             'post:publish',
@@ -50,6 +53,7 @@ const roleTemplates = {
         permissions: [
             'site:read',
             'post:create',
+            'post:read',
             'post:update',
             'post:delete',
             'post:publish',
@@ -59,8 +63,14 @@ const roleTemplates = {
 const seedPermissionsAndRoles = () => __awaiter(void 0, void 0, void 0, function* () {
     const permissionMap = {};
     for (const permission of basePermissions) {
-        const savedPermission = yield permission_model_1.default.findOneAndUpdate({ name: permission.name }, permission, { upsert: true, new: true, setDefaultsOnInsert: true });
-        permissionMap[permission.name] = savedPermission._id;
+        const existingPermission = yield permission_model_1.default.findOne({ name: permission.name });
+        if (!existingPermission) {
+            const newPermission = yield permission_model_1.default.create(permission);
+            permissionMap[permission.name] = newPermission._id;
+        }
+        else {
+            permissionMap[permission.name] = existingPermission._id;
+        }
     }
     for (const [roleName, config] of Object.entries(roleTemplates)) {
         const permissionIds = config.permissions.map((permissionName) => permissionMap[permissionName]);

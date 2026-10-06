@@ -40,7 +40,6 @@ const WordpressSiteSchema = new mongoose_1.Schema({
     username: { type: String, required: true },
     appPasswordEncrypted: { type: String, required: true },
     enabled: { type: Boolean, required: true, default: true },
-    author: { type: String, required: true },
 }, {
     timestamps: true
 });
