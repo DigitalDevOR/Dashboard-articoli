@@ -12,9 +12,45 @@ import wordpressSiteRoutes from "./routes/wordpressSite.routes";
 import permissionRoutes from "./routes/permission.routes";
 import postRoutes from "./routes/post.routes";
 import { articleQueue } from "./queues/article.queue";
-import { Article } from "./types/article.types";
+import type { Article } from "./types/article.types";
 import { readFile, writeFile, mkdir } from "fs/promises";
 
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+const isArticleSeo = (value: unknown) =>
+  isRecord(value) &&
+  Object.values(value).every(
+    (field) => field === null || typeof field === "string",
+  );
+
+const isArticle = (value: unknown): value is Article => {
+  if (
+    !isRecord(value) ||
+    typeof value.nomeSito !== "string" ||
+    typeof value.articleTitle !== "string" ||
+    typeof value.articleText !== "string"
+  ) {
+    return false;
+  }
+
+  const optionalStringFields = [
+    "articleURL",
+    "articleDate",
+    "category",
+    "imageThumbURL",
+    "gettyImageId",
+    "gettyImageTitle",
+    "gettyDownloadURL",
+    "gettyProductType",
+    "gettyAgreementName",
+  ];
+
+  return optionalStringFields.every(
+    (field) => value[field] === undefined || typeof value[field] === "string",
+  ) && (value.seo === undefined || isArticleSeo(value.seo));
+};
 
 hbs.registerHelper("json", function (context) {
   return JSON.stringify(context).replace(/</g, "\\u003c");
@@ -123,7 +159,15 @@ app.get("/", (req, res) => {
 */
 app.post("/", async (req, res) => {
   try {
-    const article: Article = req.body;
+    const article: unknown = req.body;
+
+    if (!isArticle(article)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Articolo non valido: nomeSito, articleTitle e articleText sono obbligatori; i campi SEO devono essere stringhe o null.",
+      });
+    }
 
     const job = await articleQueue.add(
       "process-article",

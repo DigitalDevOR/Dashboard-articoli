@@ -17,6 +17,17 @@ export type WordpressPostStatus =
     | 'private'
     | 'future';
 
+export interface IPostSeo {
+    focusKeyphrase?: string | null;
+    seoTitle?: string | null;
+    metaDescription?: string | null;
+    slug?: string | null;
+    imageAlt?: string | null;
+    imageAltNote?: string | null;
+    excerpt?: string | null;
+    secondaryKeywords?: string | null;
+}
+
 export interface IPost extends Document {
     siteId: mongoose.Types.ObjectId;
     wordpressPostId?: number;
@@ -27,10 +38,26 @@ export interface IPost extends Document {
     category?: string;
     excerpt?: string;
     slug?: string;
+    sourceUrl?: string;
+    sourcePublishedAt?: Date;
+    seo?: IPostSeo;
     status: WordpressPostStatus;
     featuredMedia?: number;
     embedding?: number[];
 }
+
+const PostSeoSchema = new Schema<IPostSeo>({
+    focusKeyphrase: { type: String },
+    seoTitle: { type: String },
+    metaDescription: { type: String },
+    slug: { type: String },
+    imageAlt: { type: String },
+    imageAltNote: { type: String },
+    excerpt: { type: String },
+    secondaryKeywords: { type: String },
+}, {
+    _id: false,
+});
 
 const PostSchema = new Schema<IPost>({
     siteId: {
@@ -55,6 +82,9 @@ const PostSchema = new Schema<IPost>({
     category: { type: String, trim: true },
     excerpt: { type: String, default: '' },
     slug: { type: String, trim: true },
+    sourceUrl: { type: String, trim: true },
+    sourcePublishedAt: { type: Date },
+    seo: { type: PostSeoSchema, default: undefined },
     status: {
         type: String,
         enum: ['publish', 'draft', 'pending', 'private', 'future'],

@@ -90,7 +90,7 @@ function ImagePreview({
     style?: CSSProperties
 }) {
     const [hasError, setHasError] = useState(false);
-    
+
     useEffect(() => {
         setHasError(false);
     }, [imageUrl]);
@@ -100,7 +100,7 @@ function ImagePreview({
     if (!hasImage) {
         return (
             <div
-                className={`flex ${className} shrink-0 flex-col items-center justify-center gap-1 rounded-md border border-dashed bg-muted/40 p-2 text-center text-[10px] text-muted-foreground`}
+                className='flex shrink-0 flex-col items-center justify-center gap-1 rounded-md border border-dashed bg-muted/40 p-2 text-center text-[10px] text-muted-foreground'
             >
                 <ImageOff className="h-4 w-4" />
                 <span>Immagine non caricata</span>
@@ -505,7 +505,11 @@ export default function Articoli() {
     const userSiteId = getUserSiteId(
         user?.siteAccess?.siteId
     );
-
+    const userSite = user?.siteAccess?.siteId;
+    const userSiteName =
+        userSite && typeof userSite === 'object'
+            ? userSite.name
+            : '';
     const [selectedSiteId, setSelectedSiteId] =
         useState('');
 
@@ -675,10 +679,36 @@ export default function Articoli() {
                 formData.get('excerpt') ?? ''
             ).trim(),
 
-            slug:
-                String(
+            slug: String(
+                formData.get('slug') ?? ''
+            ).trim() || undefined,
+
+            seo: {
+                focusKeyphrase: String(
+                    formData.get('focusKeyphrase') ?? ''
+                ).trim(),
+                seoTitle: String(
+                    formData.get('seoTitle') ?? ''
+                ).trim(),
+                metaDescription: String(
+                    formData.get('metaDescription') ?? ''
+                ).trim(),
+                slug: String(
                     formData.get('slug') ?? ''
-                ).trim() || undefined,
+                ).trim(),
+                imageAlt: String(
+                    formData.get('imageAlt') ?? ''
+                ).trim(),
+                imageAltNote: String(
+                    formData.get('imageAltNote') ?? ''
+                ).trim(),
+                excerpt: String(
+                    formData.get('excerpt') ?? ''
+                ).trim(),
+                secondaryKeywords: String(
+                    formData.get('secondaryKeywords') ?? ''
+                ).trim(),
+            },
 
             status: String(
                 formData.get('status') ?? 'draft'
@@ -839,6 +869,14 @@ export default function Articoli() {
             publishMutation.mutate({
                 siteId: selectedSiteId,
                 postId: post._id,
+            }, {
+                onSuccess: (response) => {
+                    useToastStore.getState().addToast({
+                        title: 'Pubblicazione completata',
+                        description: response.message,
+                        variant: 'success',
+                    });
+                },
             });
         }
     }
@@ -908,11 +946,10 @@ export default function Articoli() {
                         }
                     >
                         <RefreshCw
-                            className={`h-4 w-4 ${
-                                postsQuery.isFetching
+                            className={`h-4 w-4 ${postsQuery.isFetching
                                     ? 'animate-spin'
                                     : ''
-                            }`}
+                                }`}
                         />
 
                         Aggiorna
@@ -1004,7 +1041,7 @@ export default function Articoli() {
                         </div>
                     ) : (
                         <p className="text-sm font-medium">
-                            {selectedSiteId ||
+                            {userSiteName ||
                                 'Nessun sito associato'}
                         </p>
                     )}
@@ -1274,6 +1311,74 @@ export default function Articoli() {
                                         </div>
 
                                         <div className="space-y-2">
+                                            <Label htmlFor="focusKeyphrase">
+                                                Keyphrase SEO
+                                            </Label>
+                                            <Input
+                                                id="focusKeyphrase"
+                                                name="focusKeyphrase"
+                                                defaultValue={editingPost?.seo?.focusKeyphrase ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="seoTitle">
+                                                Titolo SEO
+                                            </Label>
+                                            <Input
+                                                id="seoTitle"
+                                                name="seoTitle"
+                                                defaultValue={editingPost?.seo?.seoTitle ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label htmlFor="metaDescription">
+                                                Meta description
+                                            </Label>
+                                            <Textarea
+                                                id="metaDescription"
+                                                name="metaDescription"
+                                                className="min-h-20"
+                                                defaultValue={editingPost?.seo?.metaDescription ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="imageAlt">
+                                                Testo alternativo immagine
+                                            </Label>
+                                            <Input
+                                                id="imageAlt"
+                                                name="imageAlt"
+                                                defaultValue={editingPost?.seo?.imageAlt ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="imageAltNote">
+                                                Nota ALT
+                                            </Label>
+                                            <Input
+                                                id="imageAltNote"
+                                                name="imageAltNote"
+                                                defaultValue={editingPost?.seo?.imageAltNote ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label htmlFor="secondaryKeywords">
+                                                Keyword secondarie
+                                            </Label>
+                                            <Textarea
+                                                id="secondaryKeywords"
+                                                name="secondaryKeywords"
+                                                className="min-h-20"
+                                                defaultValue={editingPost?.seo?.secondaryKeywords ?? ''}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
                                             <Label htmlFor="slug">
                                                 Slug opzionale
                                             </Label>
@@ -1526,150 +1631,164 @@ export default function Articoli() {
                                 </thead>
 
                                 <tbody className="divide-y">
-                                    {postsQuery.data.posts.map(
-                                        (post) => (
-                                            <tr
-                                                key={
-                                                    post._id
-                                                }
-
-                                                className='h-24'
-                                            >
-                                                {canDelete && (
-                                                    <td className="px-4 py-4">
-                                                        <input
-                                                            type="checkbox"
-                                                            aria-label={`Seleziona ${post.title}`}
-                                                            checked={selectedPostIds.includes(
-                                                                post._id
-                                                            )}
-                                                            onChange={() =>
-                                                                togglePostSelection(
-                                                                    post._id
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                bulkDeleteMutation.isPending
-                                                            }
-                                                            className="h-4 w-4 rounded border-input accent-primary"
-                                                        />
-                                                    </td>
-                                                )}
-                                                <td className="px-5 py-4 hover:w-80 hover:absolute transition-transform duration-75 w-fit flow-root">
-                                                    <ImagePreview
-                                                        imageUrl={
-                                                            post.imageUrl
+                                    {postsQuery.data.posts.map((post) => (
+                                        <tr
+                                            key={post._id}
+                                            className="h-24"
+                                        >
+                                            {canDelete && (
+                                                <td className="px-4 py-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        aria-label={`Seleziona ${post.title}`}
+                                                        checked={selectedPostIds.includes(post._id)}
+                                                        onChange={() =>
+                                                            togglePostSelection(post._id)
                                                         }
+                                                        disabled={bulkDeleteMutation.isPending}
+                                                        className="h-4 w-4 rounded border-input accent-primary"
                                                     />
                                                 </td>
+                                            )}
 
-                                                <td className="max-w-md px-5 py-4">
-                                                    <p className="truncate font-medium">
-                                                        {
-                                                            post.title
-                                                        }
-                                                    </p>
+                                            {/* IMMAGINE */}
+                                            <td className="w-[136px] min-w-[136px] px-5 py-4">
+                                                <ImagePreview
+                                                    imageUrl={post.imageUrl}
+                                                    className="
+                                                        relative
+                                                        z-10
+                                                        block
+                                                        h-16
+                                                        w-24
+                                                        shrink-0
+                                                        origin-left
+                                                        rounded-md
+                                                        border
+                                                        object-cover
+                                                        transition-transform
+                                                        duration-100
+                                                        ease-in-out
+                                                        hover:z-50
+                                                        hover:scale-[2]
+                                                        hover:border-transparent
+                                                    "
+                                                />
+                                            </td>
 
+                                            {/* TITOLO */}
+                                            <td className="max-w-md px-5 py-4">
+                                                <p className="truncate font-medium">
+                                                    {post.title}
+                                                </p>
+
+                                                <p className="truncate text-xs text-muted-foreground">
+                                                    {post.slug}
+                                                </p>
+                                                {post.seo?.focusKeyphrase && (
                                                     <p className="truncate text-xs text-muted-foreground">
-                                                        {
-                                                            post.slug
-                                                        }
+                                                        Keyphrase: {post.seo.focusKeyphrase}
                                                     </p>
-                                                </td>
+                                                )}
+                                                {post.seo?.seoTitle && (
+                                                    <p className="truncate text-xs text-muted-foreground">
+                                                        Titolo SEO: {post.seo.seoTitle}
+                                                    </p>
+                                                )}
+                                                {post.sourceUrl && (
+                                                    <p className="truncate text-xs text-muted-foreground" title={post.sourceUrl}>
+                                                        Fonte: {post.sourceUrl}
+                                                    </p>
+                                                )}
+                                                {post.sourcePublishedAt && !Number.isNaN(Date.parse(post.sourcePublishedAt)) && (
+                                                    <p className="truncate text-xs text-muted-foreground">
+                                                        Data fonte: {new Date(post.sourcePublishedAt).toLocaleDateString('it-IT')}
+                                                    </p>
+                                                )}
+                                            </td>
 
-                                                <td className="px-5 py-4">
-                                                    {post.category || '-'}
-                                                </td>
+                                            {/* CATEGORIA */}
+                                            <td className="px-5 py-4">
+                                                {post.category || '-'}
+                                            </td>
 
-                                                <td className="px-5 py-4">
-                                                    <span
-                                                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass(
-                                                            post.status
-                                                        )}`}
-                                                    >
-                                                        {
-                                                            statusLabels[
-                                                                post
-                                                                    .status
-                                                            ] ?? 'Non disponibile'
-                                                        }
-                                                    </span>
-                                                </td>
+                                            {/* STATUS */}
+                                            <td className="px-5 py-4">
+                                                <span
+                                                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass(
+                                                        post.status
+                                                    )}`}
+                                                >
+                                                    {statusLabels[post.status] ?? 'Non disponibile'}
+                                                </span>
+                                            </td>
 
-                                                <td className="px-5 py-4 text-muted-foreground">
-                                                    {new Date(
-                                                        post.createdAt
-                                                    ).toLocaleDateString(
-                                                        'it-IT'
+                                            {/* DATA */}
+                                            <td className="px-5 py-4 text-muted-foreground">
+                                                {new Date(post.createdAt).toLocaleDateString(
+                                                    'it-IT'
+                                                )}
+                                            </td>
+
+                                            {/* AZIONI */}
+                                            <td className="px-5 py-4 text-right">
+                                                <div className="flex justify-end gap-1">
+
+                                                    {canUpdate && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            className="gap-1"
+                                                            onClick={() => {
+                                                                setEditingPost(post);
+                                                                setIsFormOpen(true);
+                                                            }}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                            Modifica
+                                                        </Button>
                                                     )}
-                                                </td>
 
-                                                <td className="px-5 py-4 text-right">
-                                                    <div className="flex justify-end gap-1">
-                                                        {canUpdate && (
+                                                    {canPublish &&
+                                                        post.status !== 'publish' && (
                                                             <Button
                                                                 type="button"
                                                                 variant="ghost"
-                                                                className="gap-1"
-                                                                onClick={() => {
-                                                                    setEditingPost(
-                                                                        post
-                                                                    );
-                                                                    setIsFormOpen(
-                                                                        true
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                                Modifica
-                                                            </Button>
-                                                        )}
-
-                                                        {canPublish &&
-                                                            post.status !==
-                                                                'publish' && (
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    className="gap-1 text-emerald-700 hover:text-emerald-700"
-                                                                    onClick={() =>
-                                                                        handlePublish(
-                                                                            post
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        publishMutation.isPending
-                                                                    }
-                                                                >
-                                                                    <Send className="h-4 w-4" />
-                                                                    Pubblica
-                                                                </Button>
-                                                            )}
-
-                                                        {canDelete && (
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                className="gap-1 text-destructive hover:text-destructive"
+                                                                className="gap-1 text-emerald-700 hover:text-emerald-700"
                                                                 onClick={() =>
-                                                                    handleDelete(
-                                                                        post
-                                                                    )
+                                                                    handlePublish(post)
                                                                 }
                                                                 disabled={
-                                                                    deleteMutation.isPending ||
-                                                                    bulkDeleteMutation.isPending
+                                                                    publishMutation.isPending
                                                                 }
                                                             >
-                                                                <Trash2 className="h-4 w-4" />
-                                                                Elimina
+                                                                <Send className="h-4 w-4" />
+                                                                Pubblica
                                                             </Button>
                                                         )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    )}
+
+                                                    {canDelete && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            className="gap-1 text-destructive hover:text-destructive"
+                                                            onClick={() =>
+                                                                handleDelete(post)
+                                                            }
+                                                            disabled={
+                                                                deleteMutation.isPending ||
+                                                                bulkDeleteMutation.isPending
+                                                            }
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                            Elimina
+                                                        </Button>
+                                                    )}
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>

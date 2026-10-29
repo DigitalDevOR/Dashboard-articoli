@@ -9,8 +9,14 @@ import WordpressSite, {
 import {
     deletePostFromWordpress,
     publishPostOnWordpress,
+    updateWordpressImageAltText,
     uploadImageToWordpress,
 } from '../services/wordpress.service';
+import {
+    syncYoastSeo,
+    type YoastSeoSyncResult,
+} from '../services/yoastCeo.service';
+import type { IPostSeo } from '../models/post.models';
 
 import { generateEmbedding } from '../services/embedding.service';
 
@@ -38,11 +44,31 @@ const isPaginationValid = (page: number, limit: number | 'all') =>
 const escapeRegex = (value: string) =>
     value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const isPostSeo = (value: unknown): value is IPostSeo =>
+    Boolean(value) &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value).every(
+        (field) => field === null || typeof field === 'string',
+    );
+
+const withYoastStatus = (
+    message: string,
+    result: YoastSeoSyncResult,
+) => {
+    if (result === 'failed') {
+        return `${message} I metadati Yoast SEO non sono stati sincronizzati.`;
+    }
+
+    return message;
+};
+
 const uploadRequestImage = async (
     site: IWordpressSite,
     imageData?: string,
     fileName = 'article-image.jpg',
     contentType = 'image/jpeg',
+    altText?: string | null,
 ) => {
     if (!imageData) return undefined;
 
@@ -65,6 +91,21 @@ const uploadRequestImage = async (
 
     if (typeof media?.id !== 'number') {
         throw new Error('WordPress non ha restituito un ID valido per l’immagine caricata.');
+    }
+
+    if (altText?.trim()) {
+        try {
+            await updateWordpressImageAltText(
+                site,
+                media.id,
+                altText.trim(),
+            );
+        } catch (error) {
+            console.error(
+                `Impossibile impostare il testo alternativo del media WordPress ${media.id}:`,
+                error,
+            );
+        }
     }
 
     return {
@@ -250,6 +291,9 @@ export const createPost = async (req: Request, res: Response) => {
             imageData,
             imageFileName,
             imageContentType,
+            seo,
+            sourceUrl,
+            sourcePublishedAt,
         } = req.body;
 
         const { siteId } = req.params;
@@ -271,6 +315,12 @@ export const createPost = async (req: Request, res: Response) => {
             });
         }
 
+        if (seo !== undefined && seo !== null && !isPostSeo(seo)) {
+            return res.status(400).json({
+                message: 'Il campo seo deve contenere solo stringhe o valori null.',
+            });
+        }
+
         const site = await WordpressSite.findById(siteId);
 
         if (!site) {
@@ -285,6 +335,7 @@ export const createPost = async (req: Request, res: Response) => {
             imageData,
             imageFileName,
             imageContentType,
+            seo?.imageAlt,
         );
 
         /*
@@ -307,8 +358,11 @@ export const createPost = async (req: Request, res: Response) => {
             title: title.trim(),
             content,
             category: typeof category === 'string' ? category.trim() : undefined,
-            excerpt,
-            slug,
+            excerpt: excerpt ?? seo?.excerpt ?? '',
+            slug: slug ?? seo?.slug ?? undefined,
+            sourceUrl,
+            sourcePublishedAt,
+            seo: seo ?? undefined,
             status,
 
             featuredMedia: uploadedImage?.wordpressImageId ?? featuredMedia,
@@ -407,6 +461,12 @@ export const publishPost = async (
                 post
             );
 
+        const yoastSeoSync = await syncYoastSeo(
+            site,
+            wordpressPost.id,
+            post.seo,
+        );
+
         post.wordpressPostId =
             wordpressPost.id;
 
@@ -415,8 +475,10 @@ export const publishPost = async (
         await post.save();
 
         return res.status(200).json({
-            message:
+            message: withYoastStatus(
                 'Post pubblicato su WordPress correttamente.',
+                yoastSeoSync,
+            ),
             post,
         });
 
@@ -491,7 +553,14 @@ export const updatePost = async (
             imageData,
             imageFileName,
             imageContentType,
+            seo,
         } = req.body;
+
+        if (seo !== undefined && seo !== null && !isPostSeo(seo)) {
+            return res.status(400).json({
+                message: 'Il campo seo deve contenere solo stringhe o valori null.',
+            });
+        }
 
         let shouldRegenerateEmbedding = false;
 
@@ -540,6 +609,18 @@ export const updatePost = async (
             post.excerpt = excerpt;
         }
 
+        if (seo !== undefined) {
+            post.seo = seo ?? undefined;
+
+            if (seo?.excerpt !== undefined && excerpt === undefined) {
+                post.excerpt = seo.excerpt ?? '';
+            }
+
+            if (seo?.slug !== undefined && slug === undefined) {
+                post.slug = seo.slug ?? '';
+            }
+        }
+
         if (category !== undefined) {
             post.category = typeof category === 'string' ? category.trim() : '';
         }
@@ -569,6 +650,7 @@ export const updatePost = async (
             imageData,
             imageFileName,
             imageContentType,
+            seo?.imageAlt,
         );
 
         /*
@@ -592,6 +674,21 @@ export const updatePost = async (
             post.featuredMedia = uploadedImage.wordpressImageId;
         }
 
+        if (!uploadedImage && seo?.imageAlt !== undefined && post.wordpressImageId) {
+            try {
+                await updateWordpressImageAltText(
+                    site,
+                    post.wordpressImageId,
+                    seo.imageAlt ?? '',
+                );
+            } catch (error) {
+                console.error(
+                    `Impossibile aggiornare il testo alternativo dell'immagine per il post "${post.title}":`,
+                    error,
+                );
+            }
+        }
+
         /*
          * Rigeneriamo l'embedding solamente
          * quando cambia title o content.
@@ -612,12 +709,19 @@ export const updatePost = async (
             post.embedding = embedding;
         }
 
+        let yoastSeoSync: YoastSeoSyncResult = 'not-requested';
+
         if (post.wordpressPostId) {
             try {
-                await publishPostOnWordpress(
+                const wordpressPost = await publishPostOnWordpress(
                     site,
                     post,
                     post.status
+                );
+                yoastSeoSync = await syncYoastSeo(
+                    site,
+                    wordpressPost.id,
+                    post.seo,
                 );
             } catch (error: any) {
                 console.error(
@@ -640,8 +744,10 @@ export const updatePost = async (
         await post.save();
 
         return res.status(200).json({
-            message:
+            message: withYoastStatus(
                 'Post aggiornato correttamente.',
+                yoastSeoSync,
+            ),
             post,
         });
 

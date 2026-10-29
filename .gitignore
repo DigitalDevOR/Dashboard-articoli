@@ -4,7 +4,7 @@ dist
 vite.config.ts.*
 *.tar.gz
 attached_assets
-./deploy_server
+/deploy_server/
 .env
 .env.*
 !.env.example

@@ -2,6 +2,17 @@ import { apiClient } from './apiClient';
 
 export type PostStatus = 'publish' | 'draft' | 'pending' | 'private' | 'future';
 
+export type PostSeo = {
+    focusKeyphrase?: string | null;
+    seoTitle?: string | null;
+    metaDescription?: string | null;
+    slug?: string | null;
+    imageAlt?: string | null;
+    imageAltNote?: string | null;
+    excerpt?: string | null;
+    secondaryKeywords?: string | null;
+};
+
 export type Post = {
     _id: string;
     siteId: string;
@@ -11,6 +22,9 @@ export type Post = {
     category?: string;
     excerpt?: string;
     slug?: string;
+    sourceUrl?: string;
+    sourcePublishedAt?: string;
+    seo?: PostSeo;
     status: PostStatus;
     imageUrl?: string;
     wordpressImageId?: number;
@@ -25,6 +39,7 @@ export type PostInput = {
     category?: string;
     excerpt?: string;
     slug?: string;
+    seo?: PostSeo;
     status?: PostStatus;
     imageUrl?: string;
     wordpressImageId?: number;
@@ -102,7 +117,7 @@ export async function bulkDeletePosts(siteId: string, postIds: string[]): Promis
     return response.data;
 }
 
-export async function publishPost(siteId: string, postId: string): Promise<Post> {
+export async function publishPost(siteId: string, postId: string): Promise<PostResponse> {
     const response = await apiClient.post<PostResponse>(`${postsPath(siteId)}/${postId}/publish`);
-    return response.data.post;
+    return response.data;
 }

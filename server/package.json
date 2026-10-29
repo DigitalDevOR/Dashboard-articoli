@@ -15,7 +15,9 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "preview": "cd ../deploy_server/ftp/backend/ && npm ci && node server.js",
     "start": "npm ci && node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "yamlDev": "copy /Y docker-compose.yaml.dev docker-compose.yaml",
+    "yamlProd": "copy /Y docker-compose.yaml.prod docker-compose.yaml"
   },
   "dependencies": {
     "axios": "^1.9.0",

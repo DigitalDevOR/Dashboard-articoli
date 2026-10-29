@@ -36,9 +36,9 @@ export default function Login() {
 						Dashboard articoli
 					</div>
 					<div>
-						<p className="mb-3 text-sm text-primary-foreground/70">Area editoriale</p>
+						<p className="mb-3 text-sm text-primary-foreground/70">Gestione Articoli</p>
 						<h1 className="max-w-xs text-3xl font-semibold leading-tight">
-							Tutti i tuoi contenuti, in un unico spazio.
+							Visualizza, modifica e pubblica gli articoli sincronizzati con Wordpress.
 						</h1>
 					</div>
 				</section>
@@ -57,9 +57,13 @@ export default function Login() {
 							<div className="space-y-2">
 								<div className="flex items-center justify-between">
 									<Label htmlFor="password">Password</Label>
-									<button type="button" className="text-xs font-medium text-primary hover:underline">
-										Password dimenticata?
-									</button>
+									{
+										/*
+										<button type="button" className="text-xs font-medium text-primary hover:underline">
+											Password dimenticata?
+										</button>
+										*/
+									}
 								</div>
 								<PasswordInput id="password" name="password" placeholder="Inserisci la password" required />
 							</div>
@@ -68,9 +72,13 @@ export default function Login() {
 								{!loginMutation.isPending && <ArrowRight className="h-4 w-4" />}
 							</Button>
 						</form>
-						<p className="mt-6 text-center text-sm text-muted-foreground">
-							Non hai ancora un account? <Link href="/" className="font-medium text-primary hover:underline">Contatta l&apos;amministratore</Link>
-						</p>
+						{
+							/*
+							<p className="mt-6 text-center text-sm text-muted-foreground">
+								Non hai ancora un account? <Link href="/" className="font-medium text-primary hover:underline">Contatta l&apos;amministratore</Link>
+							</p>
+							*/
+						}
 					</CardContent>
 				</Card>
 			</div>

@@ -9,6 +9,9 @@ const getWordpressApiUrl = (site: IWordpressSite) =>
 const getWordpressCategoriesApiUrl = (site: IWordpressSite) =>
 	`${site.wpUrl.replace(/\/+$/, '')}/wp-json/wp/v2/categories`;
 
+const getWordpressMediaApiUrl = (site: IWordpressSite) =>
+	`${site.wpUrl.replace(/\/+$/, '')}/wp-json/wp/v2/media`;
+
 const getAuthConfig = (site: IWordpressSite) => ({
 	auth: {
 		username: site.username,
@@ -95,11 +98,8 @@ export const uploadImageToWordpress = async (
     fileName: string,
     contentType = 'image/jpeg',
 ) => {
-    const mediaUrl =
-        `${site.wpUrl.replace(/\/+$/, '')}/wp-json/wp/v2/media`;
-
     const response = await axios.post(
-        mediaUrl,
+        getWordpressMediaApiUrl(site),
         imageBuffer,
         {
             ...getAuthConfig(site),
@@ -116,4 +116,16 @@ export const uploadImageToWordpress = async (
     );
 
     return response.data;
+};
+
+export const updateWordpressImageAltText = async (
+	site: IWordpressSite,
+	mediaId: number,
+	altText: string,
+) => {
+	await axios.post(
+		`${getWordpressMediaApiUrl(site)}/${mediaId}`,
+		{ alt_text: altText },
+		getAuthConfig(site),
+	);
 };

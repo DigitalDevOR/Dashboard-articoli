@@ -1,5 +1,11 @@
 import * as cheerio from 'cheerio';
 
+export function normalizeArticleHtml(html: string): string {
+    return html.replace(/<[^>]*>/g, (tag) =>
+        tag.replace(/\\+"/g, '"')
+    );
+}
+
 function escapeHtml(text: string): string {
     return text
         .replace(/&/g, '&amp;')
@@ -10,12 +16,12 @@ function escapeHtml(text: string): string {
 }
 
 export function addTableOfContents(html: string): string {
-    // Se l'indice è già presente, restituisce l'HTML originale
-    if (hasTableOfContents(html)) {
-        return html;
-    }
+    const normalizedHtml = normalizeArticleHtml(html);
+    const $ = cheerio.load(normalizedHtml, null, false);
 
-    const $ = cheerio.load(html, null, false);
+    if (hasTableOfContents($)) {
+        return normalizedHtml;
+    }
 
     const usedIds = new Set<string>();
     const items: Array<{ id: string; text: string }> = [];
@@ -74,7 +80,7 @@ export function addTableOfContents(html: string): string {
 
     // Se non ci sono H2, non aggiunge alcun indice
     if (items.length === 0) {
-        return html;
+        return normalizedHtml;
     }
 
     const menu = `
@@ -93,23 +99,20 @@ ${items
 }
 
 export function removeTableOfContents(html: string): string {
-    const $ = cheerio.load(html, null, false);
+    const $ = cheerio.load(normalizeArticleHtml(html), null, false);
 
     // Rimuove il titolo creato appositamente per l'indice
     $('.article-toc-title').remove();
 
-    // Rimuove l'indice
-    $('ul.wp-block-list').each((_, element) => {
-        const list = $(element);
+    const headingIds = new Set(
+        $('h2[id]')
+            .map((_, element) => $(element).attr('id'))
+            .get()
+    );
 
-        const links = list.find('a');
-        const anchorLinks = list.find('a[href^="#"]');
-
-        const isTableOfContents =
-            links.length > 0 &&
-            links.length === anchorLinks.length;
-
-        if (isTableOfContents) {
+    $('ul').each((_, element) => {
+        if (isTableOfContents($(element), headingIds)) {
+            const list = $(element);
             list.remove();
         }
     });
@@ -117,25 +120,41 @@ export function removeTableOfContents(html: string): string {
     return $.html();
 }
 
-function hasTableOfContents(html: string): boolean {
-    const $ = cheerio.load(html, null, false);
+function hasTableOfContents($: cheerio.CheerioAPI): boolean {
+    const headingIds = new Set(
+        $('h2[id]')
+            .map((_, element) => $(element).attr('id'))
+            .get()
+    );
 
-    const lists = $('ul.wp-block-list');
+    return $('ul')
+        .toArray()
+        .some((element) =>
+            isTableOfContents($(element), headingIds)
+        );
+}
 
-    for (const element of lists.toArray()) {
-        const list = $(element);
+function isTableOfContents(
+    list: cheerio.Cheerio<any>,
+    headingIds: Set<string | undefined>
+): boolean {
+    const links = list.find('a');
 
-        const links = list.find('a');
-        const anchorLinks = list.find('a[href^="#"]');
-
-        const isTableOfContents =
-            links.length > 0 &&
-            links.length === anchorLinks.length;
-
-        if (isTableOfContents) {
-            return true;
-        }
+    if (links.length === 0) {
+        return false;
     }
 
-    return false;
+    return links.toArray().every((element) => {
+        const href = list.find(element).attr('href');
+
+        if (!href?.startsWith('#')) {
+            return false;
+        }
+
+        try {
+            return headingIds.has(decodeURIComponent(href.slice(1)));
+        } catch {
+            return false;
+        }
+    });
 }

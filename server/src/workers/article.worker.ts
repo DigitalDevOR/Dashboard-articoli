@@ -11,8 +11,12 @@ import {
 } from "../services/gettyImages.service";
 import {
   uploadImageToWordpress,
+  updateWordpressImageAltText,
 } from "../services/wordpress.service";
-import { addTableOfContents } from "../services/manipolazioneHtml.service"
+import {
+  addTableOfContents,
+  normalizeArticleHtml,
+} from "../services/manipolazioneHtml.service"
 
 async function processArticle(
   article: Article
@@ -44,6 +48,8 @@ async function processArticle(
     );
   }
 
+  const articleHtml = normalizeArticleHtml(article.articleText);
+
   console.log(
     `Sito associato: ${site.name} (${site._id.toString()})`
   );
@@ -67,7 +73,7 @@ async function processArticle(
   const duplicateCheck = await checkArticleDuplicate(
     site._id.toString(),
     article.articleTitle,
-    article.articleText
+    articleHtml
   );
 
   const {
@@ -237,10 +243,26 @@ async function processArticle(
       article.articleTitle.trim(),
 
     content:
-      addTableOfContents(article.articleText),
+      addTableOfContents(articleHtml),
 
     category:
       article.category?.trim() || undefined,
+
+    excerpt:
+      article.seo?.excerpt ?? undefined,
+
+    slug:
+      article.seo?.slug || undefined,
+
+    sourceUrl:
+      article.articleURL?.trim() || undefined,
+
+    sourcePublishedAt:
+      article.articleDate && !Number.isNaN(Date.parse(article.articleDate))
+        ? new Date(article.articleDate)
+        : undefined,
+
+    seo: article.seo,
 
     status:
       "draft",
@@ -251,7 +273,7 @@ async function processArticle(
      *
      * Altrimenti rimarranno undefined.
      */
-    imageUrl,
+    imageUrl: imageUrl ?? article.imageThumbURL,
 
     wordpressImageId,
 
@@ -267,6 +289,21 @@ async function processArticle(
      */
     embedding,
   });
+
+  if (wordpressImageId && article.seo?.imageAlt?.trim()) {
+    try {
+      await updateWordpressImageAltText(
+        site,
+        wordpressImageId,
+        article.seo.imageAlt.trim(),
+      );
+    } catch (error) {
+      console.error(
+        `Impossibile aggiornare il testo alternativo dell'immagine per "${article.articleTitle}":`,
+        error,
+      );
+    }
+  }
 
   console.log(
     `Post creato nel database: "${post.title}" (${post._id.toString()})`
