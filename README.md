@@ -13,7 +13,8 @@ immagini, categorie e controllo dei duplicati.
 | Node.js e npm | Si | Per backend e frontend. |
 | MongoDB compatibile con Atlas Vector Search | Si | Il server crea e attende l'indice vector `post_embedding_vector_index` sulla collection `posts`. La definizione usa `embedding` con 1536 dimensioni e `siteId` come filtro. MongoDB deve supportare `$vectorSearch`, `$listSearchIndexes` e `createSearchIndexes`; un MongoDB locale senza Search/Vector Search non basta. |
 | Redis | Si | BullMQ usa Redis per la coda `articles`; deve essere raggiungibile per accodare e processare gli articoli. |
-| Credenziale API OpenAI | Si | `EMBEDDING_ARTICOLI_AI_KEY` e usata per gli embedding e per il controllo semantico dei duplicati. Senza una chiave valida o credito/API accessibili, l'elaborazione degli articoli fallisce. |
+| Credenziale API OpenAI | Si | `EMBEDDING_ARTICOLI_AI_KEY` e usata per gli embedding, il controllo semantico dei duplicati e, se manca un'immagine, la generazione della copertina. |
+| Feed Google Trends Italia | Si | Il backend legge `https://trends.google.it/trending/rss?geo=IT` per contrassegnare gli articoli in trend; il feed deve essere raggiungibile dal server. |
 | Credenziali Getty Images | Solo se si richiedono immagini Getty | `GETTY_API_KEY` e `GETTY_API_SECRET` servono per scaricare l'immagine indicata da `gettyDownloadURL`. Se il download o l'upload WordPress fallisce, l'articolo continua senza immagine Getty. |
 | Sito WordPress | Si per pubblicare | Deve essere raggiungibile dal backend e avere la REST API WordPress disponibile. |
 | Yoast SEO | Solo per sincronizzare i campi SEO | Yoast deve essere installato e attivo. Le sue meta key devono essere registrate ed esposte nella REST API come descritto sotto. |
@@ -27,6 +28,8 @@ Configurare le variabili nell'ambiente del servizio backend (non nel codice):
 | `MONGODB_URI` | URI di connessione a MongoDB. Obbligatoria. |
 | `REDIS_HOST`, `REDIS_PORT` | Host e porta Redis; i valori predefiniti sono `localhost` e `6379`. In Docker usare il nome host del servizio Redis. |
 | `EMBEDDING_ARTICOLI_AI_KEY` | Chiave API OpenAI per embedding e controllo duplicati. |
+| `OPENAI_API_KEY` | Chiave alternativa per generare immagini se `EMBEDDING_ARTICOLI_AI_KEY` non e impostata. |
+| `OPENAI_IMAGE_MODEL` | Modello OpenAI per immagini; predefinito `gpt-image-2.6-flare`. Il progetto API deve avere accesso al modello selezionato. |
 | `GETTY_API_KEY`, `GETTY_API_SECRET` | Credenziali Getty, se il workflow invia `gettyDownloadURL`. |
 | `PORT` | Porta HTTP del backend; predefinita `2567`. |
 | `FRONTEND_URL` | Origine del frontend consentita da CORS. |
@@ -134,6 +137,14 @@ ma non sincronizzati con meta Yoast.
 Il workflow invia un `POST` JSON al percorso radice del backend (`/`). Il body
 deve includere `nomeSito`, `articleTitle` e `articleText`; gli altri campi sono
 opzionali.
+
+Se l'articolo non include un'immagine Getty scaricabile o `imageThumbURL`, il
+worker prova a generare un'immagine con OpenAI e a caricarla nella libreria
+media WordPress. Il titolo dell'articolo viene confrontato con i termini del
+feed Google Trends Italia; l'esito e il termine corrispondente vengono salvati
+con la bozza e sono disponibili come badge e filtro nella tabella articoli. Se
+il feed non e raggiungibile, l'errore viene registrato e la bozza viene salvata
+come non in trend.
 
 ```json
 {

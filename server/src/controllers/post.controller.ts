@@ -124,6 +124,7 @@ export const getPosts = async (req: Request, res: Response) => {
         const title = String(req.query.title ?? '').trim();
         const status = String(req.query.status ?? '').trim();
         const category = String(req.query.category ?? '').trim();
+        const isTrend = String(req.query.isTrend ?? '').trim();
         const dateFrom = String(req.query.dateFrom ?? '').trim();
         const dateTo = String(req.query.dateTo ?? '').trim();
 
@@ -154,6 +155,12 @@ export const getPosts = async (req: Request, res: Response) => {
             });
         }
 
+        if (isTrend && isTrend !== 'true' && isTrend !== 'false') {
+            return res.status(400).json({
+                message: 'Filtro trend non valido.',
+            });
+        }
+
         const postFilter: Record<string, unknown> = {
             siteId,
         };
@@ -167,6 +174,11 @@ export const getPosts = async (req: Request, res: Response) => {
 
         if (status) {
             postFilter.status = status;
+        }
+
+        if (isTrend) {
+            postFilter.isTrend =
+                isTrend === 'true' ? true : { $ne: true };
         }
 
         if (category) {
@@ -470,6 +482,16 @@ export const publishPost = async (
         post.wordpressPostId =
             wordpressPost.id;
 
+        if (
+            typeof wordpressPost.link !== 'string' ||
+            !wordpressPost.link.trim()
+        ) {
+            throw new Error(
+                'WordPress non ha restituito l’URL del post pubblicato.',
+            );
+        }
+
+        post.wordpressPostUrl = wordpressPost.link;
         post.status = 'publish';
 
         await post.save();
@@ -718,6 +740,12 @@ export const updatePost = async (
                     post,
                     post.status
                 );
+                if (
+                    typeof wordpressPost.link === 'string' &&
+                    wordpressPost.link.trim()
+                ) {
+                    post.wordpressPostUrl = wordpressPost.link;
+                }
                 yoastSeoSync = await syncYoastSeo(
                     site,
                     wordpressPost.id,

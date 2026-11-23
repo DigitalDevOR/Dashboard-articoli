@@ -10,6 +10,12 @@ import {
   downloadGettyImage,
 } from "../services/gettyImages.service";
 import {
+  generateArticleImage,
+} from "../services/openAiImage.service";
+import {
+  checkArticleGoogleTrend,
+} from "../services/googleTrends.service";
+import {
   uploadImageToWordpress,
   updateWordpressImageAltText,
 } from "../services/wordpress.service";
@@ -99,19 +105,35 @@ async function processArticle(
     `Articolo nuovo: "${article.articleTitle}". Continuo elaborazione.`
   );
 
+  let trend: Awaited<ReturnType<typeof checkArticleGoogleTrend>>;
+
+  try {
+    trend = await checkArticleGoogleTrend(article.articleTitle);
+  } catch (error) {
+    console.error(
+      `Errore verifica Google Trends per "${article.articleTitle}". Continuo senza contrassegnarlo come trend:`,
+      error
+    );
+    trend = undefined;
+  }
+
+  if (trend) {
+    console.log(
+      `Articolo in trend Google: "${article.articleTitle}" (${trend.title}).`
+    );
+  } else {
+    console.log(
+      `Articolo non rilevato tra i trend Google: "${article.articleTitle}".`
+    );
+  }
+
   /*
    * STEP 4
-   * Download Getty opzionale.
-   *
-   * Se:
-   *
-   * - gettyDownloadURL non esiste
-   * - Getty restituisce errore
-   * - Getty restituisce un'immagine vuota
-   *
-   * continuiamo comunque senza immagine.
+   * Prova a scaricare l'immagine Getty; se non c'è
+   * alcuna immagine disponibile, usa OpenAI come fallback.
    */
   let imageBuffer: Buffer | null = null;
+  let imageContentType = "image/jpeg";
 
   if (article.gettyDownloadURL?.trim()) {
     try {
@@ -146,6 +168,25 @@ async function processArticle(
     );
   }
 
+  if (!imageBuffer && !article.imageThumbURL?.trim()) {
+    try {
+      imageBuffer = await generateArticleImage(
+        article.articleTitle,
+        article.articleText,
+        article.category,
+      );
+      imageContentType = "image/png";
+      console.log(
+        `Immagine generata con OpenAI: ${imageBuffer.length} bytes`
+      );
+    } catch (error) {
+      console.error(
+        `Errore generazione immagine OpenAI per "${article.articleTitle}". Continuo senza immagine:`,
+        error
+      );
+    }
+  }
+
   /*
    * STEP 5
    * Upload immagine WordPress opzionale.
@@ -159,15 +200,17 @@ async function processArticle(
   if (imageBuffer) {
     try {
 
-      const fileName = article.gettyImageId?.trim()
+      const fileName = article.gettyImageId?.trim() &&
+        imageContentType === "image/jpeg"
         ? `${article.gettyImageId}.jpg`
-        : `article-image-${Date.now()}.jpg`;
+        : `article-image-${Date.now()}.${imageContentType === "image/png" ? "png" : "jpg"}`;
 
       const wordpressMedia =
         await uploadImageToWordpress(
           site,
           imageBuffer,
-          fileName
+          fileName,
+          imageContentType
         );
 
       /*
@@ -266,6 +309,8 @@ async function processArticle(
 
     status:
       "draft",
+    isTrend: Boolean(trend),
+    matchedTrend: trend?.title,
 
     /*
      * Se l'upload WordPress è riuscito

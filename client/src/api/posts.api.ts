@@ -17,6 +17,7 @@ export type Post = {
     _id: string;
     siteId: string;
     wordpressPostId?: number;
+    wordpressPostUrl?: string;
     title: string;
     content: string;
     category?: string;
@@ -26,6 +27,8 @@ export type Post = {
     sourcePublishedAt?: string;
     seo?: PostSeo;
     status: PostStatus;
+    isTrend?: boolean;
+    matchedTrend?: string;
     imageUrl?: string;
     wordpressImageId?: number;
     featuredMedia?: number;
@@ -55,6 +58,7 @@ export type PostFilters = {
     title: string;
     category: string;
     status: PostStatus | '';
+    isTrend: 'true' | 'false' | '';
     dateFrom: string;
     dateTo: string;
 };

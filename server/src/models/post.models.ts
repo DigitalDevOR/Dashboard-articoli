@@ -31,6 +31,7 @@ export interface IPostSeo {
 export interface IPost extends Document {
     siteId: mongoose.Types.ObjectId;
     wordpressPostId?: number;
+    wordpressPostUrl?: string;
     imageUrl?: string;
     wordpressImageId?: number;
     title: string;
@@ -42,6 +43,8 @@ export interface IPost extends Document {
     sourcePublishedAt?: Date;
     seo?: IPostSeo;
     status: WordpressPostStatus;
+    isTrend: boolean;
+    matchedTrend?: string;
     featuredMedia?: number;
     embedding?: number[];
 }
@@ -69,6 +72,10 @@ const PostSchema = new Schema<IPost>({
         type: Number,
         sparse: true,
     },
+    wordpressPostUrl: {
+        type: String,
+        trim: true,
+    },
     imageUrl: {
         type: String,
         required: false,
@@ -90,6 +97,14 @@ const PostSchema = new Schema<IPost>({
         enum: ['publish', 'draft', 'pending', 'private', 'future'],
         default: 'draft',
         required: true,
+    },
+    isTrend: {
+        type: Boolean,
+        default: false,
+    },
+    matchedTrend: {
+        type: String,
+        trim: true,
     },
     featuredMedia: { type: Number },
     embedding: {

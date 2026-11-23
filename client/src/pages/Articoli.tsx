@@ -523,6 +523,7 @@ export default function Articoli() {
         title: '',
         category: '',
         status: '',
+        isTrend: '',
         dateFrom: '',
         dateTo: '',
     });
@@ -638,6 +639,7 @@ export default function Articoli() {
             title: '',
             category: '',
             status: '',
+            isTrend: '',
             dateFrom: '',
             dateTo: '',
         });
@@ -1076,6 +1078,7 @@ export default function Articoli() {
                                 !filters.title &&
                                 !filters.category &&
                                 !filters.status &&
+                                !filters.isTrend &&
                                 !filters.dateFrom &&
                                 !filters.dateTo
                             }
@@ -1085,7 +1088,7 @@ export default function Articoli() {
                     </div>
                 </CardHeader>
 
-                <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
                     <div className="space-y-2">
                         <Label htmlFor="filter-title">
                             Titolo
@@ -1155,6 +1158,26 @@ export default function Articoli() {
                             <option value="future">
                                 Programmato
                             </option>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="filter-trend">
+                            Trend Google
+                        </Label>
+                        <Select
+                            id="filter-trend"
+                            value={filters.isTrend}
+                            onChange={(event) =>
+                                handleFilterChange(
+                                    'isTrend',
+                                    event.target.value
+                                )
+                            }
+                        >
+                            <option value="">Tutti</option>
+                            <option value="true">Solo in trend</option>
+                            <option value="false">Non in trend</option>
                         </Select>
                     </div>
 
@@ -1714,13 +1737,33 @@ export default function Articoli() {
 
                                             {/* STATUS */}
                                             <td className="px-5 py-4">
-                                                <span
-                                                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass(
-                                                        post.status
-                                                    )}`}
-                                                >
-                                                    {statusLabels[post.status] ?? 'Non disponibile'}
-                                                </span>
+                                                <div className="flex flex-col items-start gap-2">
+                                                    {post.status === 'publish' && post.wordpressPostUrl ? (
+                                                        <a
+                                                            href={post.wordpressPostUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className={`rounded-full px-2.5 py-1 text-xs font-medium hover:underline ${statusClass(post.status)}`}
+                                                            aria-label={`Apri l'articolo pubblicato: ${post.title}`}
+                                                        >
+                                                            {statusLabels[post.status] ?? 'Non disponibile'}
+                                                        </a>
+                                                    ) : (
+                                                        <span
+                                                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass(post.status)}`}
+                                                        >
+                                                            {statusLabels[post.status] ?? 'Non disponibile'}
+                                                        </span>
+                                                    )}
+                                                    {post.isTrend && (
+                                                        <span
+                                                            className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800"
+                                                            title={post.matchedTrend ? `Trend Google: ${post.matchedTrend}` : 'Articolo in trend Google'}
+                                                        >
+                                                            In trend
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             {/* DATA */}
